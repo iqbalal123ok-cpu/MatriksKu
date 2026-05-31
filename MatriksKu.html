@@ -1,0 +1,1486 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MatriksKu × Master Determinan</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,500;0,600;0,700;0,800;1,700&family=Lora:ital,wght@0,500;0,600;1,500;1,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #f5f0eb;
+  --bg2:      #fffcf8;
+  --bg3:      #ede8e1;
+  --card:     #fffcf8;
+  --border:   rgba(139,110,80,0.12);
+  --border2:  rgba(139,110,80,0.25);
+  --text:     #2d2318;
+  --text2:    #6b5744;
+  --text3:    #a8907a;
+  --accent:   #5c7a5e;
+  --accent2:  #8b6f47;
+  --green:    #4a7c59;
+  --amber:    #b8883a;
+  --red:      #b85450;
+  --cyan:     #4a7a8a;
+  --shadow:   0 2px 12px rgba(100,70,40,0.07);
+  --shadow-lg:0 8px 32px rgba(100,70,40,0.12);
+  --radius:   16px;
+  --radius-sm:10px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.6;
+}
+ 
+.screen { display: none; min-height: 100vh; animation: fadeUp .4s ease-out; }
+.screen.active { display: block; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+ 
+/* ── DASHBOARD ── */
+.dash-hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 24px;
+  text-align: center;
+}
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(92,122,94,0.1);
+  border: 1px solid rgba(92,122,94,0.2);
+  color: var(--accent);
+  padding: 7px 18px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  margin-bottom: 28px;
+}
+.hero-badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: pdot 2.5s infinite;
+}
+@keyframes pdot { 0%,100%{opacity:1;} 50%{opacity:.3;} }
+ 
+.hero-title {
+  font-family: 'Lora', serif;
+  font-size: clamp(52px, 9vw, 96px);
+  line-height: .96;
+  letter-spacing: -.02em;
+  margin-bottom: 16px;
+  color: var(--text);
+  font-weight: 600;
+}
+.hero-title span {
+  color: var(--accent);
+  font-style: italic;
+}
+.hero-sub {
+  font-size: 16px;
+  color: var(--text2);
+  max-width: 540px;
+  line-height: 1.85;
+  margin: 0 auto 60px;
+}
+.dash-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+  gap: 24px;
+  max-width: 800px;
+  width: 100%;
+}
+.dash-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 32px;
+  cursor: pointer;
+  transition: transform .3s ease, box-shadow .3s ease, border-color .3s ease;
+  text-align: left;
+  box-shadow: var(--shadow);
+}
+.dash-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--border2);
+  box-shadow: var(--shadow-lg);
+}
+.card-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 5px 13px;
+  border-radius: 100px;
+  margin-bottom: 18px;
+}
+.tag-learn { background: rgba(92,122,94,0.1); color: var(--accent); }
+.tag-game  { background: rgba(139,111,71,0.1); color: var(--accent2); }
+.card-icon { font-size: 38px; margin-bottom: 14px; display: block; }
+.dash-card h2 {
+  font-family: 'Lora', serif;
+  font-size: 23px;
+  margin-bottom: 10px;
+  color: var(--text);
+  font-weight: 600;
+}
+.dash-card p { font-size: 14px; color: var(--text2); line-height: 1.7; margin-bottom: 20px; }
+.card-feats { list-style: none; margin-bottom: 28px; }
+.card-feats li {
+  font-size: 13px;
+  color: var(--text2);
+  padding: 5px 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  line-height: 1.5;
+}
+.card-feats li::before { content: '◦'; font-size: 16px; flex-shrink: 0; margin-top: -1px; }
+.feats-learn li::before { color: var(--accent); }
+.feats-game li::before  { color: var(--accent2); }
+.btn-enter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 13px 20px;
+  border-radius: 12px;
+  border: 1.5px solid;
+  font-family: 'Nunito', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  background: transparent;
+  transition: all .2s;
+}
+.btn-learn { border-color: rgba(92,122,94,0.3); color: var(--accent); }
+.btn-learn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn-game-enter { border-color: rgba(139,111,71,0.3); color: var(--accent2); }
+.btn-game-enter:hover { background: var(--accent2); color: #fff; border-color: var(--accent2); }
+ 
+/* ── TOPBAR ── */
+.topbar {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(245,240,235,0.9);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 28px;
+  display: flex; align-items: center; height: 64px; gap: 14px;
+}
+.back-btn {
+  display: flex; align-items: center; gap: 6px;
+  background: none; border: none; color: var(--text2);
+  font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 700;
+  cursor: pointer; transition: color .2s;
+}
+.back-btn:hover { color: var(--text); }
+.topbar-title { font-size: 14px; font-weight: 700; flex: 1; text-align: center; color: var(--text); }
+.tb-badge {
+  font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
+  padding: 4px 12px; border-radius: 100px;
+  background: rgba(92,122,94,0.1); color: var(--accent);
+  border: 1px solid rgba(92,122,94,0.15);
+}
+ 
+/* ── LEARN CONTENT ── */
+.learn-wrap { max-width: 920px; margin: 0 auto; padding: 44px 28px 120px; }
+.sec-nav {
+  display: flex; gap: 4px; flex-wrap: wrap;
+  margin-bottom: 40px; padding: 5px;
+  background: var(--bg3); border-radius: 14px; border: 1px solid var(--border);
+}
+.sec-btn {
+  flex: 1; min-width: 86px;
+  padding: 9px 12px; border-radius: 10px; border: none;
+  background: transparent; color: var(--text2);
+  font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 700;
+  cursor: pointer; transition: all .2s; text-align: center; white-space: nowrap;
+}
+.sec-btn.active {
+  background: var(--card); color: var(--text);
+  box-shadow: 0 2px 8px rgba(100,70,40,0.08);
+  border: 1px solid var(--border);
+}
+.sec-btn:hover:not(.active) { color: var(--text); background: rgba(0,0,0,0.03); }
+.lsec { display: none; }
+.lsec.active { display: block; }
+ 
+/* ── TYPOGRAPHY ── */
+.lh1 {
+  font-family: 'Lora', serif;
+  font-size: clamp(28px, 5.5vw, 48px);
+  line-height: 1.12; margin-bottom: 16px; color: var(--text); font-weight: 600;
+}
+.lh1 em { color: var(--accent); font-style: italic; }
+.llead { font-size: 15px; color: var(--text2); line-height: 1.85; max-width: 720px; margin-bottom: 40px; }
+.lh2 {
+  font-family: 'Lora', serif; font-size: 24px; margin: 44px 0 14px;
+  color: var(--text); border-bottom: 1.5px solid var(--bg3); padding-bottom: 8px;
+  font-weight: 600;
+}
+.lh3 { font-size: 16px; font-weight: 700; margin: 24px 0 10px; color: var(--text); }
+.lp { font-size: 14px; color: var(--text2); line-height: 1.85; margin-bottom: 16px; }
+ 
+/* ── INFO BOX ── */
+.ibox {
+  background: rgba(92,122,94,0.06);
+  border: 1px solid rgba(92,122,94,0.15);
+  border-left: 4px solid var(--accent);
+  border-radius: 0 12px 12px 0;
+  padding: 18px 22px; margin: 22px 0;
+}
+.ibox p { color: #2a4a2c; margin: 0; font-size: 13.5px; line-height: 1.8; }
+.ibox strong { color: var(--accent); }
+ 
+/* ── MATRIX VISUAL ── */
+.mwrap { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; margin: 20px 0; }
+.mv { position: relative; display: inline-flex; align-items: center; padding: 8px 4px; }
+.mv::before, .mv::after {
+  content: ''; position: absolute; width: 8px; height: 100%;
+  border: 2px solid var(--text2); top: 0;
+}
+.mv::before { left: 0; border-right: none; border-radius: 4px 0 0 4px; }
+.mv::after  { right: 0; border-left: none;  border-radius: 0 4px 4px 0; }
+.mv.det::before, .mv.det::after {
+  border-radius: 0; border-right: none; border-left: none; width: 2px;
+}
+.mg { display: grid; gap: 5px; padding: 0 12px; }
+.mc {
+  width: 50px; height: 50px;
+  background: var(--bg3); border: 1px solid var(--border); border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 500; color: var(--text);
+}
+.mc.a { background: rgba(92,122,94,0.1); border-color: rgba(92,122,94,0.25); color: var(--accent); }
+.mc.b { background: rgba(139,111,71,0.1); border-color: rgba(139,111,71,0.25); color: var(--accent2); }
+.mc.g { background: rgba(74,124,89,0.1); border-color: rgba(74,124,89,0.25); color: var(--green); }
+ 
+/* ── FORMULA BLOCK ── */
+.fblock {
+  background: var(--bg3); border: 1px solid var(--border); border-radius: 14px;
+  padding: 22px 28px; margin: 22px 0; font-family: 'JetBrains Mono', monospace; overflow-x: auto;
+}
+.flabel {
+  font-size: 11px; text-transform: uppercase; letter-spacing: .1em;
+  color: var(--text2); font-family: 'Nunito', sans-serif;
+  margin-bottom: 10px; display: block; font-weight: 700;
+}
+.feq { font-size: 17px; line-height: 1.8; color: var(--text); }
+.feq .va { color: var(--accent); font-weight: 600; }
+.feq .vb { color: var(--accent2); font-weight: 600; }
+.feq .vc { color: var(--green); font-weight: 600; }
+.feq .vd { color: var(--amber); font-weight: 600; }
+ 
+/* ── STEP CARDS ── */
+.sgrid { display: grid; gap: 10px; margin: 22px 0; }
+.sc {
+  background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+  padding: 18px 22px; display: flex; gap: 16px; align-items: flex-start; box-shadow: var(--shadow);
+}
+.snum {
+  width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+  background: rgba(92,122,94,0.1); border: 1px solid rgba(92,122,94,0.2);
+  color: var(--accent); display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 12px;
+}
+.sc h4 { font-size: 14px; font-weight: 700; margin-bottom: 5px; color: var(--text); }
+.sc p  { font-size: 13px; color: var(--text2); line-height: 1.65; margin: 0; }
+ 
+/* ── EXAMPLE BOX ── */
+.exbox {
+  background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+  padding: 24px; margin: 22px 0; box-shadow: var(--shadow);
+}
+.extag {
+  font-size: 11px; text-transform: uppercase; letter-spacing: .07em; font-weight: 800;
+  margin-bottom: 14px; color: var(--accent2); display: inline-block;
+  background: rgba(139,111,71,0.08); padding: 4px 11px; border-radius: 100px;
+}
+.exrow { display: flex; align-items: flex-start; gap: 22px; flex-wrap: wrap; }
+.exsteps {
+  font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: var(--text2);
+  line-height: 1.9; flex: 1; min-width: 240px; white-space: pre-wrap;
+  background: var(--bg3); padding: 18px; border-radius: 10px;
+}
+ 
+/* ── PROPERTIES GRID ── */
+.pgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin: 22px 0; }
+.pcard {
+  background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+  padding: 22px; box-shadow: var(--shadow); transition: transform .2s;
+}
+.pcard:hover { transform: translateY(-3px); }
+.pnum {
+  width: 26px; height: 26px; border-radius: 50%; font-size: 11px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center; margin-bottom: 11px;
+  background: rgba(139,111,71,0.1); color: var(--accent2);
+}
+.pcard h4 { font-size: 13.5px; font-weight: 700; margin-bottom: 7px; color: var(--text); }
+.pcard p  { font-size: 12.5px; color: var(--text2); line-height: 1.65; margin: 0; }
+ 
+/* ── CALCULATOR ── */
+.calc-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: 20px;
+  padding: 32px; margin: 28px 0; box-shadow: var(--shadow-lg);
+}
+.calc-hdr {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 26px; flex-wrap: wrap; gap: 12px;
+}
+.calc-hdr h3 { font-family: 'Lora', serif; font-size: 22px; color: var(--text); font-weight: 600; }
+.stoggle {
+  display: flex; gap: 3px; background: var(--bg3); padding: 4px;
+  border-radius: 12px; border: 1px solid var(--border);
+}
+.sbtn {
+  padding: 7px 15px; border-radius: 9px; border: none; background: transparent;
+  color: var(--text2); font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 700;
+  cursor: pointer; transition: all .2s;
+}
+.sbtn.active {
+  background: var(--card); color: var(--text);
+  box-shadow: 0 2px 6px rgba(100,70,40,0.08);
+  border: 1px solid var(--border);
+}
+.calc-body { display: grid; grid-template-columns: 1fr auto 1fr; gap: 22px; align-items: start; }
+.imat { display: flex; flex-direction: column; gap: 6px; align-items: center; }
+.imat label {
+  font-size: 11px; color: var(--text2); text-transform: uppercase;
+  letter-spacing: .08em; margin-bottom: 6px; font-weight: 700;
+}
+.mi { position: relative; display: inline-flex; align-items: center; padding: 8px 4px; }
+.mi::before, .mi::after {
+  content: ''; position: absolute; width: 8px; height: 100%;
+  border: 2px solid var(--text2); top: 0;
+}
+.mi::before { left: 0; border-right: none; border-radius: 4px 0 0 4px; }
+.mi::after  { right: 0; border-left: none;  border-radius: 0 4px 4px 0; }
+.mig { display: grid; gap: 5px; padding: 0 12px; }
+.mig input {
+  width: 52px; height: 48px;
+  background: var(--bg3); border: 1px solid var(--border); border-radius: 8px;
+  color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 15px;
+  font-weight: 500; text-align: center; outline: none; transition: all .2s;
+}
+.mig input:focus { border-color: var(--accent); background: #fff; box-shadow: 0 0 0 3px rgba(92,122,94,0.15); }
+.carr { font-size: 22px; color: var(--text3); align-self: center; padding-top: 26px; }
+.rpanel {
+  background: var(--bg3); border: 1px solid var(--border); border-radius: 14px;
+  padding: 22px; min-height: 110px; display: flex; flex-direction: column;
+  justify-content: center; align-items: center; gap: 6px;
+}
+.rlabel { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--text2); font-weight: 700; }
+.rval { font-family: 'Lora', serif; font-size: 44px; line-height: 1; transition: all .3s; font-weight: 600; }
+.rval.zero { color: var(--red); }
+.rval.nz   { color: var(--green); }
+.rnote { font-size: 12px; color: var(--text2); text-align: center; line-height: 1.5; }
+.csteps {
+  margin-top: 22px; background: var(--bg3); border: 1px solid var(--border); border-radius: 14px;
+  padding: 18px 22px; font-family: 'JetBrains Mono', monospace; font-size: 12.5px;
+  color: var(--text2); line-height: 1.9; white-space: pre-wrap;
+}
+ 
+/* ── QUIZ ── */
+.qpbar { width: 100%; height: 5px; background: var(--bg3); border-radius: 3px; margin-bottom: 22px; overflow: hidden; }
+.qpfill { height: 100%; background: var(--accent); border-radius: 3px; width: 0%; transition: width .4s; }
+.qcard {
+  background: var(--card); border: 1px solid var(--border); border-radius: 18px;
+  padding: 28px; margin: 22px 0; box-shadow: var(--shadow);
+}
+.qq { font-size: 15px; font-weight: 700; margin-bottom: 16px; line-height: 1.65; color: var(--text); }
+.qmat {
+  font-family: 'JetBrains Mono', monospace; background: var(--bg3); border: 1px solid var(--border);
+  padding: 13px 20px; border-radius: 10px; font-size: 13px; color: var(--text);
+  margin: 10px 0; white-space: pre; display: inline-block; line-height: 1.9; font-weight: 500;
+}
+.qopts { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 9px; margin-top: 18px; }
+.qopt {
+  padding: 13px; border-radius: 10px; border: 1px solid var(--border);
+  background: var(--bg); color: var(--text); font-family: 'Nunito', sans-serif;
+  font-size: 14px; font-weight: 700; cursor: pointer; transition: all .2s; text-align: center;
+}
+.qopt:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); background: rgba(92,122,94,0.06); }
+.qopt.correct { border-color: var(--green); color: var(--green); background: rgba(74,124,89,0.07); }
+.qopt.wrong   { border-color: var(--red);   color: var(--red);   background: rgba(184,84,80,0.06); }
+.qfb {
+  margin-top: 14px; font-size: 13.5px; line-height: 1.7; padding: 13px 18px;
+  border-radius: 10px; display: none;
+}
+.qfb.show    { display: block; }
+.qfb.correct { background: rgba(74,124,89,0.07); border: 1px solid rgba(74,124,89,0.2); color: #2a5c35; }
+.qfb.wrong   { background: rgba(184,84,80,0.07); border: 1px solid rgba(184,84,80,0.2); color: #8a3330; }
+.qnext {
+  margin-top: 14px; padding: 11px 22px; border-radius: 10px; border: none;
+  background: var(--accent); color: #fff; font-family: 'Nunito', sans-serif;
+  font-size: 13px; font-weight: 700; cursor: pointer; display: none; transition: all .2s;
+  box-shadow: 0 3px 10px rgba(92,122,94,0.25);
+}
+.qnext:hover   { transform: translateY(-1px); box-shadow: 0 5px 14px rgba(92,122,94,0.35); }
+.qnext.show    { display: inline-flex; }
+.qinfo         { font-size: 12px; color: var(--text3); text-align: right; margin-bottom: 5px; font-weight: 700; }
+.scorecard {
+  background: var(--card); border: 1px solid var(--border); border-radius: 20px;
+  padding: 40px; text-align: center; margin: 22px 0; box-shadow: var(--shadow-lg);
+}
+.scorecard .snum { font-family: 'Lora', serif; font-size: 68px; color: var(--accent); line-height: 1; margin-bottom: 10px; }
+.stxt { font-size: 15px; color: var(--text2); margin-bottom: 26px; line-height: 1.75; }
+.btnr {
+  padding: 11px 26px; border-radius: 11px; border: 1.5px solid rgba(92,122,94,0.25);
+  background: transparent; color: var(--accent); font-family: 'Nunito', sans-serif;
+  font-size: 13px; font-weight: 700; cursor: pointer; transition: all .2s; margin: 5px;
+}
+.btnr:hover { background: var(--accent); color: #fff; }
+ 
+/* ── NAV BUTTONS ── */
+.navbtns { margin-top: 44px; display: flex; gap: 10px; flex-wrap: wrap; }
+.nbk {
+  padding: 12px 24px; border-radius: 11px; border: 1px solid var(--border);
+  background: var(--card); color: var(--text2); font-family: 'Nunito', sans-serif;
+  font-size: 13px; font-weight: 700; cursor: pointer; transition: all .2s; box-shadow: var(--shadow);
+}
+.nbk:hover { color: var(--text); border-color: var(--border2); }
+.nfw {
+  padding: 12px 24px; border-radius: 11px; border: none;
+  background: var(--accent); color: #fff; font-family: 'Nunito', sans-serif;
+  font-size: 13px; font-weight: 700; cursor: pointer; transition: all .2s;
+  box-shadow: 0 3px 10px rgba(92,122,94,0.25);
+}
+.nfw:hover { transform: translateY(-1px); box-shadow: 0 5px 14px rgba(92,122,94,0.35); }
+ 
+/* ── GAME SCREEN ── */
+.gtopbar {
+  background: rgba(245,240,235,0.9);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(139,110,80,0.15);
+  padding: 0 22px;
+  display: flex; align-items: center; height: 64px; gap: 10px;
+  position: sticky; top: 0; z-index: 100;
+}
+.gbk {
+  display: flex; align-items: center; gap: 6px;
+  background: none; border: none; color: var(--text2);
+  font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 700;
+  cursor: pointer; transition: color .2s; white-space: nowrap;
+}
+.gbk:hover { color: var(--text); }
+.gtitle { font-size: 14px; font-weight: 700; flex: 1; text-align: center; color: var(--text); }
+.gtitle span { color: var(--accent2); font-style: italic; }
+.ghud { display: flex; gap: 12px; align-items: center; }
+.huditem { display: flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 800; white-space: nowrap; }
+.huditem.sc { color: var(--green); }
+.huditem.lv { color: var(--red); }
+.huditem.tm { color: var(--amber); }
+.gwrap { max-width: 720px; margin: 0 auto; padding: 36px 22px 100px; }
+ 
+#gintr { text-align: center; padding: 48px 0; }
+.gbigtitle {
+  font-family: 'Lora', serif;
+  font-size: clamp(40px, 8vw, 72px);
+  line-height: .96; margin-bottom: 10px; color: var(--text); font-weight: 600;
+}
+.gbigtitle .gd { color: var(--accent); }
+.gbigtitle .gt { color: var(--accent2); font-style: italic; }
+.gsub { font-size: 14px; color: var(--text2); margin-bottom: 44px; line-height: 1.8; max-width: 500px; margin-left: auto; margin-right: auto; }
+.btnstart {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 14px 34px; border-radius: 14px; border: none;
+  background: var(--accent2); color: #fff;
+  font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 800;
+  cursor: pointer; transition: all .2s;
+  box-shadow: 0 4px 14px rgba(139,111,71,0.3);
+  animation: pulse 2.2s infinite;
+}
+.btnstart:hover { background: #7a5d35; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(139,111,71,0.4); }
+ 
+.record-board {
+  background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+  padding: 22px; margin: 0 auto 36px; max-width: 420px;
+  text-align: left; box-shadow: var(--shadow);
+}
+.record-board h3 {
+  margin-top: 0; color: var(--accent2); text-align: center;
+  letter-spacing: .5px; border-bottom: 1px solid var(--bg3);
+  padding-bottom: 12px; font-family: 'Nunito', sans-serif; font-size: 13px;
+  text-transform: uppercase; font-weight: 800; letter-spacing: .08em;
+}
+.record-row {
+  display: flex; justify-content: space-between;
+  padding: 11px 0; font-weight: 700; border-bottom: 1px dashed var(--border2); font-size: 13.5px;
+}
+.record-row:last-child { border-bottom: none; }
+ 
+#gplay { display: none; position: relative; }
+.shake { animation: shakeAnim .4s ease-in-out; }
+@keyframes shakeAnim { 0%,100%{transform:translateX(0);} 20%,60%{transform:translateX(-5px);} 40%,80%{transform:translateX(5px);} }
+ 
+.streak-bar {
+  background: rgba(184,136,58,0.08); border: 1px solid rgba(184,136,58,0.2);
+  border-radius: 10px; padding: 9px 16px; text-align: center;
+  font-size: 13px; color: var(--amber); font-weight: 800;
+  margin-bottom: 14px; display: none; animation: pulse 1.8s infinite;
+}
+.streak-bar.show { display: block; }
+@keyframes pulse { 0%{transform:scale(1);} 50%{transform:scale(1.01);} 100%{transform:scale(1);} }
+ 
+.vhdr { text-align: center; margin-bottom: 26px; }
+.vlvl { font-size: 11px; text-transform: uppercase; letter-spacing: .12em; color: var(--text3); margin-bottom: 5px; font-weight: 700; }
+.vtitle { font-family: 'Lora', serif; font-size: 24px; margin-bottom: 5px; color: var(--text); font-weight: 600; }
+.vdesc { font-size: 13px; color: var(--text2); max-width: 460px; margin: 0 auto; line-height: 1.65; }
+ 
+.gmsec {
+  background: var(--card); border: 1px solid var(--border); border-radius: 20px;
+  padding: 26px; margin-bottom: 20px; box-shadow: var(--shadow); position: relative;
+}
+.gmlabel { font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--text2); margin-bottom: 14px; display: block; font-weight: 700; }
+.gmdisp { display: flex; justify-content: center; }
+ 
+.tsec {
+  background: var(--bg3); border: 1px solid var(--border); border-radius: 14px;
+  padding: 16px 22px; margin-bottom: 20px; display: flex;
+  align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+}
+.tlbl { font-size: 13px; color: var(--text2); font-weight: 700; }
+.tval { font-family: 'Lora', serif; font-size: 30px; color: var(--accent2); font-weight: 600; }
+ 
+.laser-beam {
+  position: absolute; inset: 0; border: 3px solid var(--green);
+  border-radius: 20px; pointer-events: none; opacity: 0;
+}
+.laser-flash { animation: flashG .5s ease-out; }
+@keyframes flashG { 0%{opacity:1;transform:scale(1);} 100%{opacity:0;transform:scale(1.02);} }
+ 
+/* ── GAME FEEDBACK MODAL ── */
+.gfb {
+  position: fixed; top: 50%; left: 50%;
+  transform: translate(-50%, -50%) scale(.85);
+  background: var(--card); border: 1px solid var(--border); border-radius: 20px;
+  padding: 32px 44px; text-align: center; z-index: 200;
+  opacity: 0; pointer-events: none;
+  transition: all .3s cubic-bezier(.34,1.56,.64,1);
+  box-shadow: var(--shadow-lg); max-width: 90vw; width: 400px;
+}
+.gfb.show { opacity: 1; transform: translate(-50%, -50%) scale(1); pointer-events: all; }
+.fbico { font-size: 48px; margin-bottom: 10px; display: inline-block; }
+.fbtitle { font-family: 'Lora', serif; font-size: 28px; margin-bottom: 7px; color: var(--text); font-weight: 600; }
+.fbmsg  { font-size: 13.5px; color: var(--text2); margin-bottom: 18px; line-height: 1.65; }
+.fbpts  { font-family: 'JetBrains Mono', monospace; font-size: 16px; margin-bottom: 18px; font-weight: 600; }
+.fbpts.gain { color: var(--green); }
+.fbpts.lose { color: var(--red); }
+.btnnxt {
+  padding: 13px 30px; border-radius: 11px; border: none;
+  background: var(--accent2); color: #fff;
+  font-family: 'Nunito', sans-serif; font-size: 13.5px; font-weight: 700;
+  cursor: pointer; transition: all .2s; box-shadow: 0 3px 10px rgba(139,111,71,0.25);
+  width: 100%;
+}
+.btnnxt:hover { background: #7a5d35; }
+.govl {
+  position: fixed; inset: 0; background: rgba(45,35,24,0.35);
+  backdrop-filter: blur(4px); z-index: 199; opacity: 0; pointer-events: none; transition: opacity .3s;
+}
+.govl.show { opacity: 1; pointer-events: all; }
+ 
+#fxCanvas { position: fixed; inset: 0; pointer-events: none; z-index: 250; display: block; }
+ 
+/* ── GAME OVER ── */
+#gover { display: none; text-align: center; padding: 44px 0; }
+.gotitle { font-family: 'Lora', serif; font-size: clamp(32px, 6.5vw, 56px); margin-bottom: 10px; color: var(--text); font-weight: 600; }
+.goscr   { font-size: 16px; color: var(--text2); margin-bottom: 7px; }
+.gofinal {
+  font-family: 'Lora', serif; font-size: 68px;
+  color: var(--accent2); line-height: 1; margin-bottom: 32px; font-weight: 600;
+}
+.gostats { display: grid; grid-template-columns: repeat(2,1fr); gap: 12px; max-width: 320px; margin: 0 auto 36px; }
+.gostat { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 15px 11px; box-shadow: var(--shadow); }
+.gosv { font-family: 'JetBrains Mono', monospace; font-size: 23px; margin-bottom: 3px; font-weight: 600; }
+.gosl { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--text2); font-weight: 700; }
+.gostat:nth-child(1) .gosv { color: var(--accent); }
+.gostat:nth-child(2) .gosv { color: var(--green); }
+.gobtns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.btnpa {
+  padding: 13px 30px; border-radius: 11px; border: none; background: var(--accent2); color: #fff;
+  font-family: 'Nunito', sans-serif; font-size: 13.5px; font-weight: 700;
+  cursor: pointer; transition: all .2s; box-shadow: 0 3px 10px rgba(139,111,71,0.25);
+}
+.btnpa:hover { background: #7a5d35; }
+.btnhm {
+  padding: 13px 30px; border-radius: 11px; border: 1px solid var(--border);
+  background: var(--card); color: var(--text2); font-family: 'Nunito', sans-serif;
+  font-size: 13.5px; font-weight: 700; cursor: pointer; transition: all .2s; box-shadow: var(--shadow);
+}
+.btnhm:hover { color: var(--text); border-color: var(--border2); }
+ 
+/* ── DIVIDER DECORATION ── */
+.warm-divider { border: none; border-top: 1px dashed var(--border2); margin: 8px 0 28px; }
+ 
+@media(max-width:580px){
+  .topbar, .gtopbar { padding: 0 14px; }
+  .learn-wrap, .gwrap { padding: 28px 14px 80px; }
+  .calc-body { grid-template-columns: 1fr; }
+  .carr { display: none; }
+  .ghud { gap: 7px; }
+  .dash-cards { grid-template-columns: 1fr; }
+  .gfb { padding: 24px 22px; }
+}
+</style>
+</head>
+<body>
+ 
+<canvas id="fxCanvas"></canvas>
+ 
+<!-- ═══════════════════════ DASHBOARD ═══════════════════════ -->
+<div id="dashboard" class="screen active">
+  <div class="dash-hero">
+    <div class="hero-badge">Web Pembelajaran Matematika Modern</div>
+    <h1 class="hero-title">Matriks<span>Ku</span></h1>
+    <p class="hero-sub">Platform belajar determinan matriks interaktif terlengkap — Jelajahi teori mendalam, uji kemampuan lewat kalkulator langkah demi langkah, dan taklukkan arena ranked kompetitif!</p>
+    <div class="dash-cards">
+      <div class="dash-card" onclick="goLearn()">
+        <div class="card-tag tag-learn">📚 Modul Akademik</div>
+        <span class="card-icon">🎓</span>
+        <h2>Pusat Belajar Determinan</h2>
+        <p>Materi super lengkap, eksplorasi teoritis terstruktur, pembuktian formula, kalkulator cerdas, dan generator kuis adaptif!</p>
+        <ul class="card-feats feats-learn">
+          <li>Pengantar Arti Geometris &amp; Skalar</li>
+          <li>Ordo 2×2: Formula &amp; Analisis Komparatif</li>
+          <li>Ordo 3×3: Metode Sarrus &amp; Ekspansi Kofaktor</li>
+          <li>Ordo 4×4: Strategi Pintar Pemilihan Baris Nol</li>
+          <li>Eksplorasi 8 Sifat Utama Determinan</li>
+          <li>Aplikasi Nyata: Cramer, Invers, &amp; Nilai Eigen</li>
+          <li>Kalkulator Langkah-demi-Langkah Dinamis (Up to 4x4)</li>
+          <li>Kuis Evaluasi Adaptif Tanpa Batas</li>
+        </ul>
+        <button class="btn-enter btn-learn"><span>Mulai Eksplorasi</span><span>→</span></button>
+      </div>
+      <div class="dash-card" onclick="goGame()">
+        <div class="card-tag tag-game">🎮 Arena Interaktif</div>
+        <span class="card-icon">🔐</span>
+        <h2>Ranked Arena: The DETerminator</h2>
+        <p>Gunakan keahlian Aljabar Linier Anda untuk menemukan nilai variabel 'x' pada matriks acak. Cetak rekor poin dan streak tertinggimu!</p>
+        <ul class="card-feats feats-game">
+          <li>Sistem Rank: Warrior (2x2) hingga Mythic (4x4)</li>
+          <li>Pencatatan Rekor Kumulatif Otomatis (Local)</li>
+          <li>Mekanik Pengali Skor (Combo Streak Multiplier)</li>
+          <li>Efek Partikel Ledakan Energi &amp; Guncangan Layar</li>
+          <li>Pembedahan Logika Aljabar Setiap Jawaban</li>
+        </ul>
+        <button class="btn-enter btn-game-enter"><span>Mulai Bermain</span><span>→</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+ 
+<!-- ═══════════════════════ LEARN ═══════════════════════ -->
+<div id="learn" class="screen">
+  <div class="topbar">
+    <button class="back-btn" onclick="goHome()">← Beranda</button>
+    <div class="topbar-title">MatriksKu — Akademi Aljabar Linier</div>
+    <div class="tb-badge">📚 Modul</div>
+  </div>
+  <div class="learn-wrap">
+    
+    <div class="sec-nav">
+      <button class="sec-btn active" onclick="switchTab(0)">Pengantar</button>
+      <button class="sec-btn" onclick="switchTab(1)">Matriks 2×2</button>
+      <button class="sec-btn" onclick="switchTab(2)">Matriks 3×3</button>
+      <button class="sec-btn" onclick="switchTab(3)">Matriks 4×4</button>
+      <button class="sec-btn" onclick="switchTab(4)">Sifat-Sifat</button>
+      <button class="sec-btn" onclick="switchTab(5)">Aplikasi</button>
+      <button class="sec-btn" onclick="switchTab(6)">Kalkulator</button>
+      <button class="sec-btn" onclick="switchTab(7)">Kuis Adaptif</button>
+    </div>
+ 
+    <!-- TAB 0: PENGANTAR -->
+    <div class="lsec active" id="s-intro">
+      <h1 class="lh1">Apa itu <em>Determinan Matriks</em>?</h1>
+      <p class="llead">Determinan adalah fungsi khusus yang memetakan matriks persegi menjadi satu nilai skalar tunggal. Nilai skalar ini bukan sekadar angka acak, melainkan representasi dari faktor penskalaan ruang koordinat dan karakteristik esensial dari sistem linier.</p>
+      
+      <div class="ibox">
+        <p><strong>📌 Definisi Formal:</strong> Jika matriks $A$ adalah sebuah matriks persegi berukuran $n \times n$, maka determinan dari $A$ (dinotasikan sebagai <strong>det(A)</strong> atau <strong>|A|</strong>) adalah nilai yang dihitung melalui perkalian elemen-elemen matriksnya.</p>
+      </div>
+ 
+      <h2 class="lh2">Syarat Eksistensi &amp; Notasi Formal</h2>
+      <p class="lp">Satu hal fundamental yang wajib dipahami: <strong>determinan hanya dimiliki oleh matriks persegi</strong> (jumlah baris sama dengan jumlah kolom, $n = m$). Matriks persegi panjang seperti $2 \times 3$ tidak memiliki determinan.</p>
+      
+      <div class="mwrap">
+        <p class="lp">Jika matriks berupa susunan kurung siku:</p>
+        <div class="mv">
+          <div class="mg" style="grid-template-columns: repeat(2, 1fr);">
+            <div class="mc">a</div><div class="mc">b</div>
+            <div class="mc">c</div><div class="mc">d</div>
+          </div>
+        </div>
+        <p class="lp">Maka notasinya berubah menjadi garis lurus tanpa siku:</p>
+        <div class="mv det">
+          <div class="mg" style="grid-template-columns: repeat(2, 1fr);">
+            <div class="mc">a</div><div class="mc">b</div>
+            <div class="mc">c</div><div class="mc">d</div>
+          </div>
+        </div>
+      </div>
+ 
+      <h2 class="lh2">Interpretasi Geometris di Dunia Nyata</h2>
+      <div class="sgrid">
+        <div class="sc">
+          <div class="snum">2D</div>
+          <div>
+            <h4>Faktor Penskalaan Luas (Ordo 2×2)</h4>
+            <p>Pada ruang dua dimensi, nilai absolut dari determinan matriks $2 \times 2$ menyatakan <strong>luas jajaran genjang</strong> yang dibentuk oleh vektor-vektor kolom matriks tersebut.</p>
+          </div>
+        </div>
+        <div class="sc">
+          <div class="snum">3D</div>
+          <div>
+            <h4>Faktor Penskalaan Volume (Ordo 3×3)</h4>
+            <p>Pada ruang tiga dimensi, nilai absolut determinan matriks $3 \times 3$ menyatakan <strong>volume paralelpipedum</strong> (kotak miring berdimensi tiga) yang dibangun oleh ketiga vektor kolomnya.</p>
+          </div>
+        </div>
+        <div class="sc">
+          <div class="snum">0</div>
+          <div>
+            <h4>Matriks Singular (Det = 0)</h4>
+            <p>Jika determinan bernilai nol, artinya transformasi matriks meruntuhkan dimensi ruang (misal jajaran genjang gepeng menjadi sebuah garis lurus). Matriks ini tidak memiliki invers!</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="navbtns">
+        <button class="nfw" onclick="switchTab(1)">Lanjut ke Matriks 2×2 →</button>
+      </div>
+    </div>
+ 
+    <!-- TAB 1: 2×2 -->
+    <div class="lsec" id="s-m2">
+      <h1 class="lh1">Determinan Matriks <em>Ordo 2×2</em></h1>
+      <p class="llead">Merupakan struktur dasar determinan terkecil dan paling intuitif. Cara menghitungnya adalah dengan mengurangkan hasil kali elemen diagonal utama dengan hasil kali elemen diagonal samping.</p>
+      
+      <div class="fblock">
+        <span class="flabel">Formula Utama Ordo 2x2</span>
+        <div class="feq">Jika A = <span class="va">[a, b; c, d]</span>, maka: det(A) = <span class="va">a</span><span class="vd">d</span> - <span class="vb">b</span><span class="vc">c</span></div>
+      </div>
+ 
+      <div class="mwrap">
+        <p class="lp">Visualisasi Alur Diagonal:</p>
+        <div class="mv det">
+          <div class="mg" style="grid-template-columns: repeat(2, 1fr);">
+            <div class="mc a">a ↘</div><div class="mc b">b ↙</div>
+            <div class="mc g">c ↖</div><div class="mc">d ↖</div>
+          </div>
+        </div>
+        <p class="lp">Arah diagonal kanan bawah (hijau) bernilai positif (+), arah diagonal kiri bawah (coklat) bernilai negatif (-).</p>
+      </div>
+ 
+      <h2 class="lh2">Contoh Soal Pembahasan Nyata</h2>
+      
+      <div class="exbox">
+        <div class="extag">Contoh Kasus 1: Angka Positif Standard</div>
+        <div class="exrow">
+          <div class="mv det">
+            <div class="mg" style="grid-template-columns: repeat(2, 1fr);">
+              <div class="mc">4</div><div class="mc">3</div>
+              <div class="mc">1</div><div class="mc">5</div>
+            </div>
+          </div>
+          <div class="exsteps">Diketahui Matriks M = [4, 3; 1, 5]
+a = 4, b = 3, c = 1, d = 5
+ 
+det(M) = (a × d) - (b × c)
+det(M) = (4 × 5) - (3 × 1)
+det(M) = 20 - 3
+det(M) = 17</div>
+        </div>
+      </div>
+ 
+      <div class="exbox">
+        <div class="extag">Contoh Kasus 2: Melibatkan Angka Negatif</div>
+        <div class="exrow">
+          <div class="mv det">
+            <div class="mg" style="grid-template-columns: repeat(2, 1fr);">
+              <div class="mc">2</div><div class="mc">-1</div>
+              <div class="mc">6</div><div class="mc">-3</div>
+            </div>
+          </div>
+          <div class="exsteps">Diketahui Matriks N = [2, -1; 6, -3]
+a = 2, b = -1, c = 6, d = -3
+ 
+det(N) = (2 × -3) - (-1 × 6)
+det(N) = (-6) - (-6)
+det(N) = -6 + 6
+det(N) = 0  (Matriks Singular!)</div>
+        </div>
+      </div>
+ 
+      <div class="navbtns">
+        <button class="nbk" onclick="switchTab(0)">← Kembali</button>
+        <button class="nfw" onclick="switchTab(2)">Lanjut ke Matriks 3×3 →</button>
+      </div>
+    </div>
+ 
+    <!-- TAB 2: 3×3 -->
+    <div class="lsec" id="s-m3">
+      <h1 class="lh1">Determinan Matriks <em>Ordo 3×3</em></h1>
+      <p class="llead">Untuk matriks ordo 3x3 ke atas, perhitungan menjadi lebih kompleks. Metode paling populer untuk 3x3 adalah <strong>Metode Sarrus</strong>.</p>
+ 
+      <h2 class="lh2">Metode Sarrus</h2>
+      <p class="lp">Metode ini dilakukan dengan menyalin dua kolom pertama matriks ke sebelah kanan garis determinan, lalu menjumlahkan hasil kali 3 diagonal utama dan mengurangi dengan hasil kali 3 diagonal sekunder.</p>
+      
+      <div class="fblock">
+        <span class="flabel">Formula Sarrus 3x3</span>
+        <div class="feq">det(A) = (aei + bfg + cdh) - (ceg + afh + bdi)</div>
+      </div>
+ 
+      <div class="exbox">
+        <div class="extag">Contoh Perhitungan Sarrus</div>
+        <div class="exrow">
+          <div class="mv det">
+            <div class="mg" style="grid-template-columns: repeat(3, 1fr);">
+              <div class="mc">1</div><div class="mc">2</div><div class="mc">3</div>
+              <div class="mc">0</div><div class="mc">1</div><div class="mc">4</div>
+              <div class="mc">5</div><div class="mc">6</div><div class="mc">0</div>
+            </div>
+          </div>
+          <div class="exsteps">Salin Kolom 1 & 2 ke kanan:
+| 1  2  3 | 1  2
+| 0  1  4 | 0  1
+| 5  6  0 | 5  6
+ 
+Diagonal Kanan (+):
+(1×1×0) + (2×4×5) + (3×0×6) = 0 + 40 + 0 = 40
+ 
+Diagonal Kiri (-):
+(3×1×5) + (1×4×6) + (2×0×0) = 15 + 24 + 0 = 39
+ 
+det(A) = Total(+) - Total(-) = 40 - 39 = 1</div>
+        </div>
+      </div>
+ 
+      <div class="ibox">
+        <p><strong>⚠️ PENTING:</strong> Metode Sarrus HANYA berlaku eksklusif untuk matriks berukuran 3x3. Anda <strong>tidak bisa</strong> menggunakan cara coret miring ini untuk matriks 4x4 atau yang lebih besar.</p>
+      </div>
+ 
+      <div class="navbtns">
+        <button class="nbk" onclick="switchTab(1)">← Kembali</button>
+        <button class="nfw" onclick="switchTab(3)">Lanjut ke Matriks 4×4 →</button>
+      </div>
+    </div>
+ 
+    <!-- TAB 3: 4×4 -->
+    <div class="lsec" id="s-m4">
+      <h1 class="lh1">Determinan Matriks <em>Ordo 4×4</em></h1>
+      <p class="llead">Karena Metode Sarrus tidak bisa dipakai pada ordo 4x4 ke atas, kita harus menggunakan <strong>Ekspansi Kofaktor (Laplace)</strong>. Metode ini memecah matriks besar menjadi sub-matriks kecil (minor).</p>
+      
+      <div class="ibox">
+        <p><strong>💡 Trik Emas:</strong> Pilihlah baris atau kolom yang memiliki <strong>angka nol (0) paling banyak</strong>. Karena setiap kofaktor akan dikalikan dengan elemen barisnya. Jika elemennya 0, maka hasil kalinya pasti 0 — tidak perlu dihitung! Menghemat banyak waktu.</p>
+      </div>
+ 
+      <h2 class="lh2">Pembedahan Strategi Cerdas 4x4</h2>
+      
+      <div class="exbox">
+        <div class="extag">Contoh Kasus Ekspansi Optimal</div>
+        <div class="exrow">
+          <div class="mv det">
+            <div class="mg" style="grid-template-columns: repeat(4, 1fr);">
+              <div class="mc">2</div><div class="mc">1</div><div class="mc">3</div><div class="mc">0</div>
+              <div class="mc">0</div><div class="mc">4</div><div class="mc">0</div><div class="mc">0</div>
+              <div class="mc">1</div><div class="mc">-1</div><div class="mc">2</div><div class="mc">5</div>
+              <div class="mc">3</div><div class="mc">2</div><div class="mc">1</div><div class="mc">0</div>
+            </div>
+          </div>
+          <div class="exsteps">Langkah 1: Observasi Baris/Kolom.
+Lihat Baris 2: [0, 4, 0, 0]. Ada TIGA angka nol!
+Ini adalah jackpot. Ekspansi sepanjang Baris 2.
+ 
+Langkah 2: Tentukan Pola Tanda (+ / -).
+[ +  -  +  - ]
+[ -  +  -  + ]  ← Baris 2
+[ +  -  +  - ]
+[ -  +  -  + ]
+ 
+Langkah 3: Terapkan Ekspansi Baris 2.
+det(P) = -0(M21) + 4(M22) - 0(M23) + 0(M24)
+det(P) = 4 × M22
+(Hanya perlu hitung SATU minor!)
+ 
+Langkah 4: Minor M22 (coret Baris 2 & Kolom 2).
+| 2  3  0 |
+| 1  2  5 |
+| 3  1  0 |
+ 
+Langkah 5: Kolom 3 ada dua nol → ekspansi lagi.
+Elemen B2K3 = 5, tanda kofaktor = (-).
+det(Minor) = -5 × det([2,3;3,1])
+det([2,3;3,1]) = 2 - 9 = -7
+det(Minor) = -5 × (-7) = 35
+ 
+Langkah 6: Kembali ke persamaan awal.
+det(P) = 4 × 35 = 140 ✓</div>
+        </div>
+      </div>
+ 
+      <div class="navbtns">
+        <button class="nbk" onclick="switchTab(2)">← Kembali</button>
+        <button class="nfw" onclick="switchTab(4)">Lanjut ke Sifat-Sifat →</button>
+      </div>
+    </div>
+ 
+    <!-- TAB 4: SIFAT -->
+    <div class="lsec" id="s-sifat">
+      <h1 class="lh1">8 Sifat Utama <em>Determinan</em></h1>
+      <p class="llead">Menguasai sifat-sifat determinan mempermudah analisis matematika tanpa harus menghitung seluruh elemen matriks secara manual berulang-ulang.</p>
+      
+      <div class="pgrid">
+        <div class="pcard"><div class="pnum">1</div><h4>Determinan Transpose</h4><p>det(Aᵀ) = det(A). Memutar baris menjadi kolom tidak mengubah nilai akhir determinan.</p></div>
+        <div class="pcard"><div class="pnum">2</div><h4>Determinan Invers</h4><p>det(A⁻¹) = 1 / det(A). Nilai determinan invers adalah kebalikan pecahan dari matriks asli.</p></div>
+        <div class="pcard"><div class="pnum">3</div><h4>Perkalian Matriks</h4><p>det(A × B) = det(A) × det(B). Determinan dari hasil perkalian sama dengan perkalian masing-masing skalar.</p></div>
+        <div class="pcard"><div class="pnum">4</div><h4>Efek Skalar Konstanta</h4><p>det(k · A) = kⁿ · det(A), di mana n adalah dimensi ordo dari matriks persegi.</p></div>
+        <div class="pcard"><div class="pnum">5</div><h4>Baris/Kolom Nol</h4><p>Jika satu baris atau satu kolom seluruh elemennya bernilai 0, maka det(A) otomatis = 0.</p></div>
+        <div class="pcard"><div class="pnum">6</div><h4>Baris Identik/Identikal</h4><p>Jika ada 2 baris atau 2 kolom yang identik atau kelipatannya, maka det(A) = 0.</p></div>
+        <div class="pcard"><div class="pnum">7</div><h4>Pertukaran Baris</h4><p>Menukar posisi dua baris/kolom pada matriks akan mengubah tanda determinan (+ menjadi - atau sebaliknya).</p></div>
+        <div class="pcard"><div class="pnum">8</div><h4>Matriks Segitiga</h4><p>Untuk matriks segitiga atas/bawah, determinannya adalah hasil kali seluruh elemen diagonal utama.</p></div>
+      </div>
+ 
+      <div class="navbtns">
+        <button class="nbk" onclick="switchTab(3)">← Kembali</button>
+        <button class="nfw" onclick="switchTab(5)">Lanjut ke Aplikasi Matriks →</button>
+      </div>
+    </div>
+ 
+    <!-- TAB 5: APLIKASI -->
+    <div class="lsec" id="s-aplikasi">
+      <h1 class="lh1">Aplikasi <em>Determinan</em> di Dunia Riil</h1>
+      <p class="llead">Determinan bukan sekadar latihan matematika di kelas. Konsep ini digunakan sebagai motor penggerak di balik algoritma komputasi sains data, grafika 3D, fisika kuantum, dan teknik mesin.</p>
+ 
+      <div class="sgrid">
+        <div class="sc">
+          <div class="snum">🚀</div>
+          <div><h4>1. Penyelesaian SPL (Aturan Cramer)</h4><p>Aturan Cramer menggunakan perbandingan rasio determinan untuk mencari nilai variabel terikat pada Sistem Persamaan Linier Kompleks tanpa eliminasi manual.</p></div>
+        </div>
+        <div class="sc">
+          <div class="snum">🔄</div>
+          <div><h4>2. Eksistensi Invers Matriks</h4><p>Dalam kriptografi penguncian data, matriks dekripsi membutuhkan operasi invers. Determinan berfungsi sebagai validator: jika det = 0, kunci enkripsi rusak dan data tidak dapat diinvers.</p></div>
+        </div>
+        <div class="sc">
+          <div class="snum">🧠</div>
+          <div><h4>3. Nilai Eigen &amp; Machine Learning</h4><p>Untuk mereduksi dimensi data raksasa lewat PCA (Principal Component Analysis), ilmuwan data menyelesaikan persamaan karakteristik <strong>det(A - λI) = 0</strong> guna mengekstrak nilai Eigen.</p></div>
+        </div>
+      </div>
+ 
+      <div class="navbtns">
+        <button class="nbk" onclick="switchTab(4)">← Kembali</button>
+        <button class="nfw" onclick="switchTab(6)">Coba Kalkulator Interaktif →</button>
+      </div>
+    </div>
+ 
+    <!-- TAB 6: KALKULATOR -->
+    <div class="lsec" id="s-kalk">
+      <h1 class="lh1">Kalkulator <em>Cerdas</em></h1>
+      <p class="llead">Masukkan angka ke dalam sel matriks di bawah ini. Sistem kami akan menghitung nilainya seketika lengkap dengan penjabaran langkah logisnya!</p>
+ 
+      <div class="calc-card">
+        <div class="calc-hdr">
+          <h3>Konfigurasi Matriks</h3>
+          <div class="stoggle">
+            <button class="sbtn active" id="b22" onclick="setCalCOrdo(2)">Ordo 2×2</button>
+            <button class="sbtn" id="b33" onclick="setCalCOrdo(3)">Ordo 3×3</button>
+            <button class="sbtn" id="b44" onclick="setCalCOrdo(4)">Ordo 4×4</button>
+          </div>
+        </div>
+        <div class="calc-body">
+          <div class="imat">
+            <label>Input Elemen</label>
+            <div class="mi">
+              <div class="mig" id="calcGrid" style="grid-template-columns: repeat(2, 1fr);"></div>
+            </div>
+          </div>
+          <div class="carr">➔</div>
+          <div>
+            <div class="rpanel">
+              <span class="rlabel">Hasil Akhir Skalar</span>
+              <div class="rval nz" id="calcRes">0</div>
+              <div class="rnote" id="calcNote">Matriks Non-Singular (Memiliki Invers)</div>
+            </div>
+          </div>
+        </div>
+        <div class="lh3">Langkah Pemecahan:</div>
+        <div class="csteps" id="calcSteps">Langkah komputasi akan tampil di sini secara real-time saat Anda mengubah angka.</div>
+      </div>
+ 
+      <div class="navbtns">
+        <button class="nbk" onclick="switchTab(5)">← Kembali</button>
+        <button class="nfw" onclick="switchTab(7)">Uji Kemampuan di Kuis ✨</button>
+      </div>
+    </div>
+ 
+    <!-- TAB 7: KUIS -->
+    <div class="lsec" id="s-kuis">
+      <h1 class="lh1">Kuis <em>Evaluasi Komprehensif</em></h1>
+      <p class="llead">Asah pemahaman matematis Anda dengan menjawab soal-soal adaptif di bawah ini. Sistem memproduksi soal baru secara dinamis tiap sesi.</p>
+      <div id="quizBox"></div>
+      <div class="navbtns">
+        <button class="nbk" onclick="switchTab(6)">← Kembali ke Kalkulator</button>
+      </div>
+    </div>
+  </div>
+</div>
+ 
+<!-- ═══════════════════════ GAME ═══════════════════════ -->
+<div id="game" class="screen">
+  <div class="gtopbar">
+    <button class="gbk" onclick="goHome()">✕ Keluar Game</button>
+    <div class="gtitle">Operasi Cyber: <span>The DETerminator</span></div>
+    <div class="ghud">
+      <div class="huditem sc">🏆 <span id="gScore">0</span> pts</div>
+      <div class="huditem lv">❤️ <span id="gLives">3</span> HP</div>
+      <div class="huditem tm">⏱️ <span id="gTimer">0.0</span>s</div>
+    </div>
+  </div>
+ 
+  <div class="gwrap">
+    <div id="gintr">
+      <h1 class="gbigtitle"><span class="gd">THE DET</span><span class="gt">erminator</span></h1>
+      <p class="gsub">Sistem keamanan bank menggunakan algoritma enkripsi berbasis determinan matriks persegi. Temukan variabel <strong>x</strong> pada matriks acak yang sesuai dengan target determinan untuk meretas brankas!</p>
+      
+      <div class="record-board">
+        <h3>🏆 Papan Rekor Kumulatif (Lokal)</h3>
+        <div class="record-row">
+          <span>Skor Tertinggi (Top Score):</span>
+          <span id="rec-score" style="color: var(--accent);">0 Poin</span>
+        </div>
+        <div class="record-row">
+          <span>Streak Terpanjang:</span>
+          <span id="rec-streak" style="color: var(--green);">0 Match</span>
+        </div>
+        <div class="record-row">
+          <span>Total Waktu Streak Terpanjang:</span>
+          <span id="rec-time" style="color: var(--red);">--</span>
+        </div>
+      </div>
+ 
+      <div style="text-align: center;">
+        <button class="btnstart" onclick="startGame()">⚡ Mulai Match Ranked</button>
+      </div>
+    </div>
+ 
+    <div id="gplay">
+      <div class="laser-beam" id="laserFx"></div>
+      <div class="streak-bar" id="gStreakBox">🔥 COMBO STREAK x<span id="gStreakV">0</span>! Bonus poin aktif!</div>
+      
+      <div class="vhdr">
+        <div class="vlvl">Rank Pertandingan: <span id="curLvlDisp" style="color:var(--accent2); font-weight:800;">Warrior</span></div>
+        <div class="vtitle">Target Determinan = <span id="targetDetDisp" style="color:var(--accent);">0</span></div>
+        <div class="vdesc">Petunjuk: Ketik nilai variabel <strong>x</strong> di dalam matriks agar hasil determinannya sesuai dengan target di atas, lalu tekan Enter!</div>
+      </div>
+ 
+      <div class="gmsec">
+        <span class="gmlabel">Matriks Sandi Kode</span>
+        <div class="gmdisp">
+          <div class="mv det" id="gameMatWrap"></div>
+        </div>
+      </div>
+ 
+      <div class="tsec">
+        <div class="tlbl">Status Firewall Enkripsi:</div>
+        <div class="tval" id="gStatusTxt">Terkunci</div>
+      </div>
+      
+      <button class="btnnxt" style="width:100%; padding:15px; font-size:15px;" onclick="submitGameAns()">Eksekusi Jawaban ➔</button>
+    </div>
+ 
+    <div id="gover">
+      <h1 class="gotitle" id="goT">Retasan Gagal!</h1>
+      <p class="goscr">Total Skor Peretasan Yang Didapatkan:</p>
+      <div class="gofinal" id="goF">0</div>
+      <div class="gostats">
+        <div class="gostat"><div class="gosv" id="goLv">Warrior</div><div class="gosl">Rank Terakhir</div></div>
+        <div class="gostat"><div class="gosv" id="goC">0</div><div class="gosl">Max Streak</div></div>
+      </div>
+      <div class="gobtns">
+        <button class="btnpa" onclick="resetGame()">⚡ Main Lagi</button>
+        <button class="btnhm" onclick="goHome()">🏠 Kembali ke Beranda</button>
+      </div>
+    </div>
+  </div>
+</div>
+ 
+<div class="govl" id="govl"></div>
+<div class="gfb" id="gfb">
+  <div class="fbico" id="fbIco">🎉</div>
+  <div class="fbtitle" id="fbT">Respons Diterima</div>
+  <div class="fbmsg" id="fbMsg">Sandi enkripsi valid! Akses lapisan berikutnya dibuka.</div>
+  <div class="fbpts" id="fbPts">+100 Poin</div>
+  <button class="btnnxt" onclick="nextLvl()">Lanjutkan Operasi ➔</button>
+</div>
+ 
+<script>
+function goHome(){
+  hideAll();
+  document.getElementById('dashboard').classList.add('active');
+}
+function goLearn(){
+  hideAll();
+  document.getElementById('learn').classList.add('active');
+  setCalCOrdo(2);
+  startQuiz();
+}
+function goGame(){
+  hideAll();
+  document.getElementById('game').classList.add('active');
+  document.getElementById('gintr').style.display='block';
+  document.getElementById('gplay').style.display='none';
+  document.getElementById('gover').style.display='none';
+  updateLobbyRecordsDisplay();
+}
+function hideAll(){
+  clearInterval(timerInterval);
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+}
+ 
+function switchTab(idx){
+  var tabs = ['intro','m2','m3','m4','sifat','aplikasi','kalk','kuis'];
+  var btns = document.querySelectorAll('.sec-nav .sec-btn');
+  var secs = document.querySelectorAll('.lsec');
+  btns.forEach(b=>b.classList.remove('active'));
+  secs.forEach(s=>s.classList.remove('active'));
+  if(btns[idx]) btns[idx].classList.add('active');
+  if(document.getElementById('s-'+tabs[idx])) document.getElementById('s-'+tabs[idx]).classList.add('active');
+}
+ 
+function getDeterminant(matrix, size){
+  if(size===1) return matrix[0];
+  if(size===2) return (matrix[0]*matrix[3])-(matrix[1]*matrix[2]);
+  let det=0;
+  for(let i=0;i<size;i++){
+    let sub=[];
+    for(let r=1;r<size;r++){
+      for(let c=0;c<size;c++){
+        if(c!==i) sub.push(matrix[r*size+c]);
+      }
+    }
+    let sign=(i%2===0)?1:-1;
+    det+=sign*matrix[i]*getDeterminant(sub,size-1);
+  }
+  return det;
+}
+ 
+var currentCalcOrdo=2;
+function setCalCOrdo(o){
+  currentCalcOrdo=o;
+  document.getElementById('b22').className=o==2?'sbtn active':'sbtn';
+  document.getElementById('b33').className=o==3?'sbtn active':'sbtn';
+  document.getElementById('b44').className=o==4?'sbtn active':'sbtn';
+  var grid=document.getElementById('calcGrid');
+  grid.style.gridTemplateColumns=`repeat(${o},1fr)`;
+  initCalc();
+}
+function initCalc(){
+  var grid=document.getElementById('calcGrid');
+  grid.innerHTML='';
+  var defs=currentCalcOrdo==2?[3,2,1,4]:currentCalcOrdo==3?[1,2,3,0,1,4,5,6,0]:[1,0,2,-1,3,0,0,5,2,1,4,-3,1,0,5,0];
+  for(let i=0;i<currentCalcOrdo*currentCalcOrdo;i++){
+    var val=defs[i]!==undefined?defs[i]:1;
+    grid.innerHTML+=`<input type="number" value="${val}" id="c_${i}" oninput="runCalc()">`;
+  }
+  runCalc();
+}
+function runCalc(){
+  var vals=[];
+  for(let i=0;i<currentCalcOrdo*currentCalcOrdo;i++){
+    var el=document.getElementById('c_'+i);
+    vals.push(el?parseFloat(el.value)||0:0);
+  }
+  var det=0, steps="";
+  if(currentCalcOrdo==2){
+    let a=vals[0],b=vals[1],c=vals[2],d=vals[3];
+    det=(a*d)-(b*c);
+    steps=`Rumus Matriks 2x2: det = (a × d) - (b × c)\n`;
+    steps+=`det = (${a} × ${d}) - (${b} × ${c})\n`;
+    steps+=`det = ${a*d} - ${b*c}\n`;
+    steps+=`det = ${det}`;
+  } else if(currentCalcOrdo==3){
+    let a=vals[0],b=vals[1],c=vals[2],d=vals[3],e=vals[4],f=vals[5],g=vals[6],h=vals[7],i=vals[8];
+    let p1=a*e*i,p2=b*f*g,p3=c*d*h;
+    let m1=c*e*g,m2=a*f*h,m3=b*d*i;
+    det=(p1+p2+p3)-(m1+m2+m3);
+    steps=`Metode Sarrus (Ekspansi 3x3):\n`;
+    steps+=`Diagonal Kanan (+):\n`;
+    steps+=`  ${a}×${e}×${i} = ${p1}\n  ${b}×${f}×${g} = ${p2}\n  ${c}×${d}×${h} = ${p3}\n`;
+    steps+=`  Total (+) = ${p1+p2+p3}\n\n`;
+    steps+=`Diagonal Kiri (-):\n`;
+    steps+=`  ${c}×${e}×${g} = ${m1}\n  ${a}×${f}×${h} = ${m2}\n  ${b}×${d}×${i} = ${m3}\n`;
+    steps+=`  Total (-) = ${m1+m2+m3}\n\n`;
+    steps+=`det = ${p1+p2+p3} - ${m1+m2+m3} = ${det}`;
+  } else {
+    det=getDeterminant(vals,currentCalcOrdo);
+    steps=`Kalkulasi ordo ${currentCalcOrdo}x${currentCalcOrdo} menggunakan algoritma rekursif Ekspansi Kofaktor Laplace...\n\nHasil akhir: ${det}`;
+  }
+  var rv=document.getElementById('calcRes');
+  rv.textContent=det;
+  rv.className='rval '+(det==0?'zero':'nz');
+  document.getElementById('calcNote').textContent=det==0?'⚠️ Matriks Singular! Tidak punya invers.':'Matriks Non-Singular (Invers Eksis)';
+  document.getElementById('calcSteps').textContent=steps;
+}
+ 
+var qCur=0,qTotal=5,qScore=0,qAns=0;
+function rn(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
+function startQuiz(){qCur=0;qScore=0;nextQuizQuest();}
+function nextQuizQuest(){
+  if(qCur>=qTotal){renderQuizEnd();return;}
+  qCur++;
+  var is33=qCur>3;
+  var html=`<div class="qinfo">Pertanyaan ${qCur} dari ${qTotal}</div>`;
+  html+=`<div class="qpbar"><div class="qpfill" style="width:${(qCur-1)/qTotal*100}%"></div></div>`;
+  if(!is33){
+    let a=rn(1,8),b=rn(1,5),c=rn(1,5),d=rn(1,8);
+    qAns=(a*d)-(b*c);
+    html+=`<div class="qcard"><div class="qq">Berapakah nilai skalar determinan dari matriks persegi 2x2 berikut?</div>`;
+    html+=`<div class="qmat">|  ${a}   ${b}  |\n|  ${c}   ${d}  |</div>`;
+  } else {
+    let a=rn(1,4),b=rn(0,3),c=rn(1,3),d=0,e=rn(1,3),f=rn(1,4),g=0,h=0,i=rn(1,3);
+    qAns=a*e*i;
+    html+=`<div class="qcard"><div class="qq">Gunakan sifat matriks segitiga! Hitung determinan 3x3 ini dengan cepat:</div>`;
+    html+=`<div class="qmat">|  ${a}   ${b}   ${c}  |\n|  ${d}   ${e}   ${f}  |\n|  ${g}   ${h}   ${i}  |</div>`;
+  }
+  var opts=[qAns,qAns+rn(2,5),qAns-rn(1,4),qAns*2+1];
+  opts=[...new Set(opts)].sort(()=>Math.random()-.5);
+  while(opts.length<4) opts.push(qAns+rn(6,20));
+  opts.sort((x,y)=>x-y);
+  html+=`<div class="qopts">`;
+  opts.forEach(o=>{html+=`<button class="qopt" onclick="subQuiz('${o}',this)">${o}</button>`;});
+  html+=`</div><div id="qfb_kuis" class="qfb"></div>`;
+  html+=`<button id="qnxt" class="qnext" onclick="nextQuizQuest()">Pertanyaan Berikutnya ➔</button></div>`;
+  document.getElementById('quizBox').innerHTML=html;
+}
+function subQuiz(ans,btn){
+  document.querySelectorAll('.qopt').forEach(b=>b.disabled=true);
+  var fb=document.getElementById('qfb_kuis');
+  var nxt=document.getElementById('qnxt');
+  if(parseInt(ans)==qAns){
+    btn.classList.add('correct');
+    fb.className="qfb show correct";
+    fb.innerHTML=`🎉 <strong>Benar!</strong> Perhitungan Anda sangat akurat.`;
+    qScore+=20;
+  } else {
+    btn.classList.add('wrong');
+    fb.className="qfb show wrong";
+    fb.innerHTML=`❌ <strong>Salah!</strong> Jawaban yang benar adalah <strong>${qAns}</strong>.`;
+    document.querySelectorAll('.qopt').forEach(b=>{if(parseInt(b.textContent)==qAns) b.classList.add('correct');});
+  }
+  nxt.classList.add('show');
+}
+function renderQuizEnd(){
+  var html=`<div class="scorecard"><div class="snum">${qScore}</div><h3>Evaluasi Selesai!</h3>`;
+  html+=`<p class="stxt">Anda berhasil mengumpulkan total nilai akademik sebesar ${qScore} poin dari batas maksimal 100 poin.</p>`;
+  html+=`<button class="btnr" onclick="startQuiz()">Mulai Ulang Kuis</button></div>`;
+  document.getElementById('quizBox').innerHTML=html;
+}
+ 
+let score=0,streak=0,correctX=0,currentGameSize=2,gameVals=[],hiddenIndex=0;
+let startTime,timerInterval,currentStreakTotalTime=0;
+let gLv=3,gMaxStreakSession=0,currentExpectedDet=0;
+let topScore=parseInt(localStorage.getItem('matrix_top_score'))||0;
+let maxStreak=parseInt(localStorage.getItem('matrix_max_streak'))||0;
+let maxStreakTime=localStorage.getItem('matrix_max_streak_time')?parseFloat(localStorage.getItem('matrix_max_streak_time')):null;
+ 
+const tiers=[
+  {name:'Warrior (Ordo 2x2)',minStreak:0,size:2,minVal:1,maxVal:5},
+  {name:'Elite (Ordo 2x2 Minus)',minStreak:3,size:2,minVal:-5,maxVal:5},
+  {name:'Master (Ordo 3x3)',minStreak:6,size:3,minVal:-2,maxVal:3},
+  {name:'Epic (Ordo 3x3 Advance)',minStreak:10,size:3,minVal:-5,maxVal:5},
+  {name:'Legend (Ordo 4x4)',minStreak:15,size:4,minVal:-2,maxVal:2},
+  {name:'Mythic (Ordo 4x4 Hardcore)',minStreak:20,size:4,minVal:-3,maxVal:4}
+];
+ 
+function getCurrentTier(){return tiers.slice().reverse().find(t=>streak>=t.minStreak)||tiers[0];}
+function updateLobbyRecordsDisplay(){
+  document.getElementById('rec-score').innerText=topScore+" Poin";
+  document.getElementById('rec-streak').innerText=maxStreak+" Match";
+  document.getElementById('rec-time').innerText=maxStreakTime?maxStreakTime.toFixed(2)+" detik":"--";
+}
+function startGame(){
+  document.getElementById('gintr').style.display='none';
+  document.getElementById('gplay').style.display='block';
+  score=0;streak=0;currentStreakTotalTime=0;gLv=3;gMaxStreakSession=0;
+  updateHud();
+  loadLvl();
+}
+function loadLvl(){
+  let tier=getCurrentTier();
+  document.getElementById('curLvlDisp').textContent=tier.name;
+  document.getElementById('gStatusTxt').textContent="Mendekripsi...";
+  document.getElementById('gStatusTxt').style.color="var(--text2)";
+  currentGameSize=tier.size;
+  let total=currentGameSize*currentGameSize;
+  gameVals=Array.from({length:total},()=>rn(tier.minVal,tier.maxVal));
+  hiddenIndex=rn(0,total-1);
+  correctX=gameVals[hiddenIndex];
+  let targetDet=getDeterminant(gameVals,currentGameSize);
+  let testMatrix=[...gameVals];
+  testMatrix[hiddenIndex]+=1;
+  if(getDeterminant(testMatrix,currentGameSize)===targetDet) return loadLvl();
+  currentExpectedDet=targetDet;
+  document.getElementById('targetDetDisp').textContent=targetDet;
+  var wrap=document.getElementById('gameMatWrap');
+  wrap.innerHTML=`<div class="mg" style="grid-template-columns:repeat(${currentGameSize},1fr);"></div>`;
+  var mg=wrap.querySelector('.mg');
+  for(let i=0;i<total;i++){
+    if(i===hiddenIndex){
+      mg.innerHTML+=`<input type="number" id="gAnsInput" class="mc a" placeholder="x" style="width:100%;height:100%;border:2px solid var(--accent2);background:#fff;outline:none;" autofocus onkeypress="handleGameKey(event)">`;
+    } else {
+      mg.innerHTML+=`<div class="mc">${gameVals[i]}</div>`;
+    }
+  }
+  startTimer();
+}
+function startTimer(){
+  clearInterval(timerInterval);
+  startTime=performance.now();
+  timerInterval=setInterval(()=>{
+    let e=(performance.now()-startTime)/1000;
+    document.getElementById('gTimer').innerText=e.toFixed(1);
+  },100);
+}
+function handleGameKey(e){if(e.key==='Enter') submitGameAns();}
+function submitGameAns(){
+  clearInterval(timerInterval);
+  let elapsed=parseFloat(((performance.now()-startTime)/1000).toFixed(2));
+  var inp=document.getElementById('gAnsInput').value;
+  if(inp===''){startTimer();return;}
+  var uAns=parseInt(inp);
+  var ok=(uAns===correctX);
+  let matrix0=[...gameVals]; matrix0[hiddenIndex]=0;
+  let matrix1=[...gameVals]; matrix1[hiddenIndex]=1;
+  let B=getDeterminant(matrix0,currentGameSize);
+  let A=getDeterminant(matrix1,currentGameSize)-B;
+  let signA=A>=0?`+ ${A}`:`- ${Math.abs(A)}`;
+  let eq=`${signA}x ${B>=0?'+ '+B:'- '+Math.abs(B)} = ${currentExpectedDet}`;
+  if(eq.startsWith('+ ')) eq=eq.substring(2);
+  let mathBreakdown=`<div style="background:rgba(100,70,40,0.05);padding:12px;border-radius:8px;margin-top:14px;font-family:'JetBrains Mono',monospace;font-size:12px;text-align:left;color:var(--text);border-left:3px solid var(--accent2);">
+<strong>Logika Aljabar Matriks:</strong><br>
+1. Persamaan: <code>${eq}</code><br>
+2. Eliminasi: <code>${A}x = ${currentExpectedDet} - (${B})</code><br>
+3. Hasil: <code>x = ${(currentExpectedDet-B)/A}</code></div>`;
+  if(ok){
+    streak++;
+    if(streak>gMaxStreakSession) gMaxStreakSession=streak;
+    currentStreakTotalTime+=elapsed;
+    let base=currentGameSize*100,bon=Math.min(streak*25,300),gain=base+bon;
+    score+=gain;
+    let isNew=false;
+    if(score>topScore){topScore=score;localStorage.setItem('matrix_top_score',topScore);isNew=true;}
+    if(streak>maxStreak){maxStreak=streak;maxStreakTime=currentStreakTotalTime;localStorage.setItem('matrix_max_streak',maxStreak);localStorage.setItem('matrix_max_streak_time',maxStreakTime);isNew=true;}
+    else if(streak===maxStreak&&(maxStreakTime===null||currentStreakTotalTime<maxStreakTime)){maxStreakTime=currentStreakTotalTime;localStorage.setItem('matrix_max_streak_time',maxStreakTime);isNew=true;}
+    triggerLaserFx();
+    spawnFx(true);
+    showFb(true,gain,elapsed,isNew,mathBreakdown);
+  } else {
+    streak=0;gLv--;
+    triggerShake();
+    spawnFx(false);
+    showFb(false,0,elapsed,false,mathBreakdown);
+  }
+  updateHud();
+}
+function updateHud(){
+  document.getElementById('gScore').textContent=score;
+  document.getElementById('gLives').textContent=gLv;
+  var sb=document.getElementById('gStreakBox');
+  if(streak>1){document.getElementById('gStreakV').textContent=streak;sb.classList.add('show');}
+  else sb.classList.remove('show');
+  if(gLv<=0) setTimeout(endGame,1000);
+}
+function triggerLaserFx(){
+  var l=document.getElementById('laserFx');
+  l.classList.add('laser-flash');
+  setTimeout(()=>l.classList.remove('laser-flash'),500);
+}
+function triggerShake(){
+  var p=document.getElementById('gplay');
+  p.classList.add('shake');
+  setTimeout(()=>p.classList.remove('shake'),400);
+}
+function showFb(ok,pts,timeSec,isNewRec,mathBreakdown){
+  document.getElementById('govl').classList.add('show');
+  document.getElementById('gfb').classList.add('show');
+  document.getElementById('fbIco').textContent=ok?'⚡':'💥';
+  document.getElementById('fbT').textContent=ok?'Nilai X Ditemukan!':'Kalkulasi Meleset!';
+  var msg=ok?`Waktu pengerjaan: ${timeSec}s. Kunci matriks berhasil terbuka!`:`Jawaban Anda keliru. Jawaban yang benar adalah x = ${correctX}.`;
+  if(ok&&isNewRec) msg+=` 🔥 Rekor Baru!`;
+  msg+=mathBreakdown;
+  document.getElementById('fbMsg').innerHTML=msg;
+  var pe=document.getElementById('fbPts');
+  pe.textContent=ok?`+${pts} Poin Peretasan`:(gLv>0?`Kehilangan 1 Integritas HP`:`Sistem Terkunci Permanen!`);
+  pe.className='fbpts '+(ok?'gain':'lose');
+  document.querySelector('.btnnxt').style.display=gLv<=0?'none':'inline-block';
+}
+function nextLvl(){
+  document.getElementById('govl').classList.remove('show');
+  document.getElementById('gfb').classList.remove('show');
+  if(gLv>0) loadLvl();
+}
+function endGame(){
+  document.getElementById('govl').classList.remove('show');
+  document.getElementById('gfb').classList.remove('show');
+  document.getElementById('gplay').style.display='none';
+  document.getElementById('gover').style.display='block';
+  document.getElementById('goF').textContent=score;
+  document.getElementById('goLv').textContent=getCurrentTier().name;
+  document.getElementById('goC').textContent=gMaxStreakSession;
+}
+function resetGame(){
+  document.getElementById('gover').style.display='none';
+  document.getElementById('gintr').style.display='block';
+  updateLobbyRecordsDisplay();
+}
+ 
+var canvas=document.getElementById('fxCanvas');
+var ctx=canvas.getContext('2d');
+var particles=[];
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+window.addEventListener('resize',resizeCanvas);
+resizeCanvas();
+function spawnFx(success){
+  let count=success?60:30;
+  let colors=success?['#4a7c59','#5c7a5e','#8b6f47','#4a7a8a']:['#b85450','#b8883a','#6b5744'];
+  for(let i=0;i<count;i++){
+    particles.push({
+      x:window.innerWidth/2,y:window.innerHeight/2,
+      vx:(Math.random()-.5)*(success?12:18),vy:(Math.random()-.5)*(success?12:18),
+      radius:Math.random()*4+2,
+      color:colors[Math.floor(Math.random()*colors.length)],
+      alpha:1,decay:Math.random()*.02+.015
+    });
+  }
+}
+function animFx(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  for(let i=particles.length-1;i>=0;i--){
+    let p=particles[i];
+    p.x+=p.vx;p.y+=p.vy;p.alpha-=p.decay;
+    if(p.alpha<=0){particles.splice(i,1);continue;}
+    ctx.save();ctx.globalAlpha=p.alpha;ctx.beginPath();
+    ctx.arc(p.x,p.y,p.radius,0,Math.PI*2);
+    ctx.fillStyle=p.color;ctx.fill();ctx.restore();
+  }
+  requestAnimationFrame(animFx);
+}
+animFx();
+</script>
+</body>
+</html>
